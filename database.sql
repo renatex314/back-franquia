@@ -17,11 +17,11 @@ CREATE TABLE IF NOT EXISTS franqueado(
 CREATE TABLE IF NOT EXISTS franquia(
 	franquia_id INT PRIMARY KEY AUTO_INCREMENT,
     franquia_nome VARCHAR(100) NOT NULL,
-    franquia_endereço VARCHAR(200) NOT NULL,
+    franquia_endereco VARCHAR(200) NOT NULL,
     franquia_telefone CHAR(20) NOT NULL,
     franquia_franqueado_id INT NOT NULL,
-    CONSTRAINT frqdo_uq UNIQUE (franqueado_id),
-    CONSTRAINT frqdo_fk FOREIGN KEY (franqueado_id) REFERENCES franqueado(franqueado_id)
+    CONSTRAINT frqdo_uq UNIQUE (franquia_franqueado_id),
+    CONSTRAINT frqdo_fk FOREIGN KEY (franquia_franqueado_id) REFERENCES franqueado(franqueado_id)
 );
 
 CREATE TABLE IF NOT EXISTS curso(

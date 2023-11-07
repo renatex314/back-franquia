@@ -9,3 +9,7 @@ export interface Franquia {
 export type FranquiaList = Array<Franquia>;
 
 export type FranquiaDropdown = Array<{ value: number; label: string }>;
+
+export type GetFranquiaByIdRequestProps = {
+  franquiaId: number;
+}

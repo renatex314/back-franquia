@@ -15,7 +15,7 @@ const getFranquiaList = async () => {
   }
 }
 
-const getFranquiaByFields = async (fields: { [key in keyof Franquia]: string | number }) => {
+const getFranquiaByFields = async (fields: { [key in keyof Franquia]?: string | number }) => {
   const connection = await getConnection();
 
   try {

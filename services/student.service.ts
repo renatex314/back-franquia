@@ -20,7 +20,7 @@ const createStudent = async (studentData: CreateStudentData) => {
   const trx = await connection.transaction();
 
   try {
-    connection.insert(studentData).into('aluno').transacting(trx);
+    await connection.insert(studentData).into('aluno').transacting(trx);
 
     trx.commit();
   } catch (err) {

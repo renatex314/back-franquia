@@ -4,7 +4,10 @@ import studentService from "./student.service";
 
 const registerStudent = async (registerStudentData: StudentRegisterData) => {
   try {
-    if (await studentService.getStudentByFields({ alunoEmail: registerStudentData.alunoEmail }) !== null || await studentService.getStudentByFields({ alunoCpf: registerStudentData.alunoCpf })) {
+    const studentByEmail = await studentService.getStudentByFields({ alunoEmail: registerStudentData.alunoEmail });
+    const studentByCpf = await studentService.getStudentByFields({ alunoCpf: registerStudentData.alunoCpf });
+
+    if (studentByEmail || studentByCpf) {
       throw new Error('Aluno já está cadastrado');
     }
 
