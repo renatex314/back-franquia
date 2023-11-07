@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS franquia;
 
 USE franquia;
 
-CREATE TABLE lingua(
+CREATE TABLE IF NOT EXISTS lingua(
 	lingua_id INT PRIMARY KEY AUTO_INCREMENT,
     lingua_nome VARCHAR(100) NOT NULL
 );
@@ -32,12 +32,12 @@ CREATE TABLE IF NOT EXISTS curso(
 );
 
 CREATE TABLE IF NOT EXISTS franquia_curso(
-	franquia_curso_id INT AUTO_INCREMENT,
+	franquia_curso_id INT PRIMARY KEY AUTO_INCREMENT,
     franquia_id INT NOT NULL,
     curso_id INT NOT NULL,
     CONSTRAINT fq_fk FOREIGN KEY (franquia_id) REFERENCES franquia(franquia_id),
     CONSTRAINT cr_fk FOREIGN KEY (curso_id) REFERENCES curso(curso_id),
-    CONSTRAINT fq_pk PRIMARY KEY (franquia_id, curso_id)
+    CONSTRAINT fq_uq UNIQUE (franquia_id, curso_id)
 );
 
 CREATE TABLE IF NOT EXISTS aluno(
@@ -51,13 +51,13 @@ CREATE TABLE IF NOT EXISTS aluno(
     CONSTRAINT frqia_fk FOREIGN KEY (aluno_franquia_id) REFERENCES franquia(franquia_id)
 );
 
-CREATE TABLE professor(
+CREATE TABLE IF NOT EXISTS professor(
 	professor_id INT PRIMARY KEY AUTO_INCREMENT,
     professor_nome VARCHAR(100) NOT NULL,
     professor_telefone CHAR(11) NOT NULL
 );
 
-CREATE TABLE professor_qualificacao(
+CREATE TABLE IF NOT EXISTS professor_qualificacao(
 	professor_id INT NOT NULL,
     lingua_id INT NOT NULL,
     CONSTRAINT prf_fk FOREIGN KEY (professor_id) REFERENCES professor(professor_id),
