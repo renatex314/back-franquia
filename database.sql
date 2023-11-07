@@ -46,7 +46,9 @@ CREATE TABLE IF NOT EXISTS aluno(
     aluno_nome VARCHAR(100) NOT NULL,
     aluno_endereco VARCHAR(200) NOT NULL,
     aluno_telefone CHAR(11),
+    aluno_cpf CHAR(11) NOT NULL UNIQUE,
     aluno_email VARCHAR(50) NOT NULL UNIQUE,
+    aluno_senha_hash VARCHAR(100) NOT NULL,
     aluno_data_nascimento DATE,
     aluno_franquia_id INT NOT NULL,
     CONSTRAINT frqia_fk FOREIGN KEY (aluno_franquia_id) REFERENCES franquia(franquia_id)
@@ -55,7 +57,8 @@ CREATE TABLE IF NOT EXISTS aluno(
 CREATE TABLE IF NOT EXISTS professor(
 	professor_id INT PRIMARY KEY AUTO_INCREMENT,
     professor_nome VARCHAR(100) NOT NULL,
-    professor_telefone CHAR(11) NOT NULL
+    professor_telefone CHAR(11) NOT NULL,
+    professor_senha_hash VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS professor_qualificacao(
@@ -104,9 +107,8 @@ CREATE TABLE IF NOT EXISTS avaliacao(
 );
 
 
-
-
-
+CREATE USER IF NOT EXISTS 'aplicacao'@'localhost' IDENTIFIED BY 'Senha123@';
+GRANT ALL ON franquia.* TO 'aplicacao'@'localhost';
 
 
 
