@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS franquia(
     franquia_nome VARCHAR(100) NOT NULL,
     franquia_endereço VARCHAR(200) NOT NULL,
     franquia_telefone CHAR(20) NOT NULL,
-    franqueado_id INT NOT NULL,
+    franquia_franqueado_id INT NOT NULL,
+    CONSTRAINT frqdo_uq UNIQUE (franqueado_id),
     CONSTRAINT frqdo_fk FOREIGN KEY (franqueado_id) REFERENCES franqueado(franqueado_id)
 );
 
@@ -81,19 +82,7 @@ CREATE TABLE IF NOT EXISTS matricula(
     matricula_aluno_id INT NOT NULL,
     matricula_curso_franquia_id INT NOT NULL,
     CONSTRAINT aln_fk FOREIGN KEY (matricula_aluno_id) REFERENCES aluno(aluno_id),
-    CONSTRAINT crs_frq_fk FOREIGN KEY (matricula_curso_franquia_id) REFERENCES franquia_curso(franquia_curso_id),
-    CONSTRAINT mtr_aln_frq CHECK(
-    (SELECT 
-		franquia_id 
-		FROM aluno 
-		WHERE aluno_id=matricula_aluno_id
-	)
-    =
-    (SELECT 
-		franquia_id 
-        FROM franquia_curso 
-        WHERE franquia_curso_id=matricula_curso_franquia_id)
-	)
+    CONSTRAINT crs_frq_fk FOREIGN KEY (matricula_curso_franquia_id) REFERENCES franquia_curso(franquia_curso_id)
 );
 
 CREATE TABLE IF NOT EXISTS pagamento(
