@@ -2,30 +2,16 @@ CREATE DATABASE IF NOT EXISTS franquia;
 
 USE franquia;
 
+CREATE TABLE lingua(
+	lingua_id INT PRIMARY KEY AUTO_INCREMENT,
+    lingua_nome VARCHAR(100) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS franqueado(
 	franqueado_id INT PRIMARY KEY AUTO_INCREMENT,
     franqueado_nome VARCHAR(100) NOT NULL,
-    franqueado_data_nascimento DATE
-);
-
-CREATE TABLE IF NOT EXISTS aluno(
-	aluno_id INT PRIMARY KEY AUTO_INCREMENT,
-    aluno_nome VARCHAR(100) NOT NULL,
-    aluno_endereco VARCHAR(200) NOT NULL,
-    aluno_telefone CHAR(11),
-    aluno_email VARCHAR(50) NOT NULL UNIQUE,
-    aluno_data_nascimento DATE
-);
-
-CREATE TABLE IF NOT EXISTS professor(
-	professor_id INT PRIMARY KEY AUTO_INCREMENT,
-);
-
-CREATE TABLE IF NOT EXISTS curso(
-	curso_id INT PRIMARY KEY AUTO_INCREMENT,
-    curso_nome VARCHAR(100) NOT NULL,
-    curso_lingua_ensinada ENUM("português", "espanhol", "inglês", "russo", "italiano") NOT NULL,
-    curso_nivel ENUM("iniciante", "intermediario", "avançado") NOT NULL
+    franqueado_data_nascimento DATE,
+    franqueado_telefone CHAR(11) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS franquia(
@@ -37,14 +23,103 @@ CREATE TABLE IF NOT EXISTS franquia(
     CONSTRAINT frqdo_fk FOREIGN KEY (franqueado_id) REFERENCES franqueado(franqueado_id)
 );
 
-/*
-	Fomos contratados para atender às necessidades da 'Global Speaking School', uma escola de idiomas de destaque, que busca aprimorar sua eficiência e gestão por meio de um sistema de banco de dados personalizado. Este projeto visa simplificar o acompanhamento de alunos, cursos e professores, ao mesmo tempo em que mantém registros detalhados para a administração acadêmica e financeira. Vamos explorar os requisitos detalhados e desenvolver uma estrutura de banco de dados que atenda às necessidades da escola, com a certeza de que estamos comprometidos com o sucesso deste empreendimento.
-•	Registre informações sobre cada franquia da rede "Global Speaking School”, incluindo nome da franquia, endereço, informações de contato e dados do franqueado responsável.
-•	O banco de dados deve armazenar informações sobre os alunos matriculados em cada franquia. Isso inclui nome, endereço, número de telefone, e-mail e data de nascimento. um aluno pode se inscrever em várias aulas de um curso e uma aula pode ter vários alunos inscritos.
-•	Cada franquia oferece vários cursos de idiomas. Os detalhes de cada curso devem ser registrados, incluindo o nome do curso, língua ensinada, nível (iniciante, intermediário, avançado), horário e local das aulas, bem como o professor responsável.
-•	Os alunos se matriculam em cursos específicos em uma franquia específica. É necessário rastrear quais alunos estão matriculados em quais cursos, a data de matrícula e o status da matrícula (ativa, inativa).
-•	Mantenha um registro de todos os pagamentos feitos pelos alunos em cada franquia, incluindo o valor, data do pagamento, método de pagamento e status (pendente, pago, atrasado)
-•	Registre informações sobre os professores que ministram os cursos em cada franquia, incluindo nome, informações de contato e informações sobre qualificação.
-•	Acompanhe as aulas programadas para cada curso em cada franquia, incluindo datas, horários, local e status (realizada, cancelada).
-•	Registre as notas e avaliações dos alunos em seus cursos em cada franquia para acompanhamento do desempenho.
-*/
+CREATE TABLE IF NOT EXISTS curso(
+	curso_id INT PRIMARY KEY AUTO_INCREMENT,
+    curso_nome VARCHAR(100) NOT NULL,
+    curso_lingua_id INT NOT NULL,
+    curso_nivel ENUM("iniciante", "intermediario", "avançado") NOT NULL,
+    CONSTRAINT crso_fk FOREIGN KEY (curso_lingua_id) REFERENCES lingua(lingua_id)
+);
+
+CREATE TABLE IF NOT EXISTS franquia_curso(
+	franquia_curso_id INT AUTO_INCREMENT,
+    franquia_id INT NOT NULL,
+    curso_id INT NOT NULL,
+    CONSTRAINT fq_fk FOREIGN KEY (franquia_id) REFERENCES franquia(franquia_id),
+    CONSTRAINT cr_fk FOREIGN KEY (curso_id) REFERENCES curso(curso_id),
+    CONSTRAINT fq_pk PRIMARY KEY (franquia_id, curso_id)
+);
+
+CREATE TABLE IF NOT EXISTS aluno(
+	aluno_id INT PRIMARY KEY AUTO_INCREMENT,
+    aluno_nome VARCHAR(100) NOT NULL,
+    aluno_endereco VARCHAR(200) NOT NULL,
+    aluno_telefone CHAR(11),
+    aluno_email VARCHAR(50) NOT NULL UNIQUE,
+    aluno_data_nascimento DATE,
+    aluno_franquia_id INT NOT NULL,
+    CONSTRAINT frqia_fk FOREIGN KEY (aluno_franquia_id) REFERENCES franquia(franquia_id)
+);
+
+CREATE TABLE professor(
+	professor_id INT PRIMARY KEY AUTO_INCREMENT,
+    professor_nome VARCHAR(100) NOT NULL,
+    professor_telefone CHAR(11) NOT NULL
+);
+
+CREATE TABLE professor_qualificacao(
+	professor_id INT NOT NULL,
+    lingua_id INT NOT NULL,
+    CONSTRAINT prf_fk FOREIGN KEY (professor_id) REFERENCES professor(professor_id),
+    CONSTRAINT lga_fk FOREIGN KEY (lingua_id) REFERENCES lingua(lingua_id),
+    CONSTRAINT prf_ql_pk PRIMARY KEY (professor_id, lingua_id)
+);
+
+CREATE TABLE IF NOT EXISTS aula(
+	aula_id INT PRIMARY KEY AUTO_INCREMENT,
+    aula_horario DATETIME NOT NULL,
+    aula_local VARCHAR(100) NOT NULL,
+    aula_status ENUM("realizada", "cancelada"),
+    aula_franquia_curso_id INT NOT NULL,
+    CONSTRAINT fqcrso_fk FOREIGN KEY (aula_franquia_curso_id) REFERENCES franquia_curso(franquia_curso_id)
+);
+
+CREATE TABLE IF NOT EXISTS matricula(
+	matricula_id INT PRIMARY KEY AUTO_INCREMENT,
+    matricula_data DATE,
+    matricula_status ENUM('ativa', 'inativa'),
+    matricula_aluno_id INT NOT NULL,
+    matricula_curso_franquia_id INT NOT NULL,
+    CONSTRAINT aln_fk FOREIGN KEY (matricula_aluno_id) REFERENCES aluno(aluno_id),
+    CONSTRAINT crs_frq_fk FOREIGN KEY (matricula_curso_franquia_id) REFERENCES franquia_curso(franquia_curso_id),
+    CONSTRAINT mtr_aln_frq CHECK(
+    (SELECT 
+		franquia_id 
+		FROM aluno 
+		WHERE aluno_id=matricula_aluno_id
+	)
+    =
+    (SELECT 
+		franquia_id 
+        FROM franquia_curso 
+        WHERE franquia_curso_id=matricula_curso_franquia_id)
+	)
+);
+
+CREATE TABLE IF NOT EXISTS pagamento(
+	pagamento_id INT PRIMARY KEY AUTO_INCREMENT,
+    pagamento_valor DECIMAL(10, 2) NOT NULL,
+    pagamento_data DATETIME,
+    pagamento_metodo ENUM("crédito", "débito", "boleto") NOT NULL,
+    pagamento_status ENUM("pendente", "pago", "atrasado") NOT NULL,
+    pagamento_matricula_id INT NOT NULL,
+    CONSTRAINT pgmt_fk FOREIGN KEY (pagamento_matricula_id) REFERENCES matricula(matricula_id)
+);
+
+CREATE TABLE IF NOT EXISTS avaliacao(
+	avaliacao_id INT PRIMARY KEY AUTO_INCREMENT,
+    avaliacao_nota DECIMAL(3, 1) NOT NULL,
+    avaliacao_data DATETIME,
+    avaliacao_matricula_id INT NOT NULL,
+    CONSTRAINT avl_mtr_fk FOREIGN KEY (avaliacao_matricula_id) REFERENCES matricula(matricula_id)
+);
+
+
+
+
+
+
+
+
+
+
