@@ -1,5 +1,6 @@
 import { getConnection } from "../controllers/db.controller";
 import { Franquia, FranquiaList } from "../types/franquia";
+import { GetByFieldsProps } from "../types/utils";
 
 const getFranquiaList = async () => {
   const connection = await getConnection();
@@ -15,7 +16,7 @@ const getFranquiaList = async () => {
   }
 }
 
-const getFranquiaByFields = async (fields: { [key in keyof Franquia]?: string | number }) => {
+const getFranquiaByFields = async (fields: GetByFieldsProps<Franquia>) => {
   const connection = await getConnection();
 
   try {

@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS professor(
     professor_telefone VARCHAR(20),
     professor_email VARCHAR(50) NOT NULL,
     professor_senha_hash VARCHAR(150) NOT NULL,
-    professor_cpf VARCHAR(20) NOT NULL UNIQUE,
+    professor_cpf VARCHAR(20) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS professor_cursofranquia(

@@ -1,0 +1,1 @@
+export type GetByFieldsProps<T> = {[key in keyof T]?: number | string};

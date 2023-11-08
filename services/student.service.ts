@@ -1,7 +1,8 @@
 import { getConnection } from "../controllers/db.controller";
 import { CreateStudentData, Student } from "../types/student";
+import { GetByFieldsProps } from "../types/utils";
 
-const getStudentByFields = async (fields: {[key in keyof Student]?: number | string}) => {
+const getStudentByFields = async (fields: GetByFieldsProps<Student>) => {
   const connection = getConnection();
 
   try {
