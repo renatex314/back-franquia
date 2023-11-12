@@ -1,3 +1,4 @@
 export type TokenData = {
-  alunoEmail: string;
+  role: 'aluno' | 'professor';
+  userEmail: string;
 };

@@ -5,6 +5,8 @@ import { decodeVerifyToken, generateToken } from "../utils";
 import { StudentLoginData, StudentRegisterData } from "../types/auth";
 import studentService from "../services/student.service";
 import { Student } from "../types/student";
+import { Professor } from "../types/professor";
+import professorService from "../services/professor.service";
 
 const loginStudent: RequestHandler = async (req, res) => {
   const studentLoginData: StudentLoginData = req.body;
@@ -19,7 +21,7 @@ const loginStudent: RequestHandler = async (req, res) => {
         studentDataFromDB.alunoSenhaHash
       )
     ) {
-      const userToken = generateToken(studentLoginData.alunoEmail);
+      const userToken = generateToken('aluno', studentLoginData.alunoEmail);
 
       return res.status(200).send(userToken);
     }
@@ -40,31 +42,49 @@ const registerStudent: RequestHandler = async (req, res) => {
   try {
     await authService.registerStudent(studentData);
 
-    res.status(200).send(generateToken(studentData.alunoEmail));
+    res.status(200).send(generateToken('aluno', studentData.alunoEmail));
   } catch (err) {
     res.status(500).send((err as Error).message);
   }
 };
 
-const getStudentMeData: RequestHandler = async (req, res) => {
+const getUserMeData: RequestHandler = async (req, res) => {
   const token = req.headers?.authorization?.split(" ")?.[1] || "";
 
   try {
     const tokenData = decodeVerifyToken(token);
 
-    const studentData: Student = await studentService.getStudentByFields({
-      alunoEmail: tokenData.alunoEmail
-    });
+    if (!tokenData.role) return res.status(400).send('role não encontrado');
 
-    if (!studentData)
-      return res.status(401).send("Aluno não encontrado no sistema");
+    let userData: Partial<Professor | Student> = {};
 
-    const studentReturnData = { ...studentData } as Partial<Student>;
+    if (tokenData.role === 'aluno') {
+      userData = await studentService.getStudentByFields({
+        alunoEmail: tokenData.userEmail
+      });
+      delete userData.alunoSenhaHash;
+    }
 
-    delete studentReturnData.alunoId;
-    delete studentReturnData.alunoSenhaHash;
+    if (tokenData.role === 'professor') {
+      userData = await professorService.getProfessorByFields({
+        professorEmail: tokenData.userEmail
+      });
+      delete userData.professorSenhaHash;
+    }
 
-    res.status(200).send(studentData);
+    if (!userData) {
+      return res.status(400).send('usuário não encontrado no sistema');
+    } else {
+      if (tokenData.role === 'aluno') {
+        delete (userData as Partial<Student>).alunoSenhaHash;
+      }
+
+      if (tokenData.role === 'professor') {
+        delete (userData as Partial<Professor>).professorSenhaHash;
+      }
+    }
+
+    res.status(200).json({ role: tokenData.role, userData });
   } catch (err) {
     console.error(err);
 
@@ -75,5 +95,5 @@ const getStudentMeData: RequestHandler = async (req, res) => {
 export default {
   loginStudent,
   registerStudent,
-  getStudentMeData,
+  getUserMeData,
 };

@@ -33,3 +33,5 @@ const registerStudent = async (registerStudentData: StudentRegisterData) => {
 export default {
   registerStudent
 };
+
+// console.log(bcrypt.hashSync('Senha123@', 10));

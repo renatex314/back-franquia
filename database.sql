@@ -4,6 +4,7 @@ USE franquia;
 
 CREATE TABLE IF NOT EXISTS franqueado(
     franqueado_id INT PRIMARY KEY AUTO_INCREMENT,
+    franqueado_nome VARCHAR(100) NOT NULL,
     franqueado_endereco VARCHAR(100) NOT NULL,
     franqueado_telefone VARCHAR(20) NOT NULL,
     franqueado_cpf VARCHAR(20) NOT NULL UNIQUE

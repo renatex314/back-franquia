@@ -16,8 +16,8 @@ app.use(
   })
 );
 app.use(json());
-app.post("/login", authController.loginStudent);
-app.post("/register", authController.registerStudent);
+app.post("/login/aluno", authController.loginStudent);
+// app.post("/register", authController.registerStudent);
 app.use("/api/", authMiddleware.authenticateUser, router);
 
 app.listen(port, () => {
