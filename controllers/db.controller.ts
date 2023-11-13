@@ -5,14 +5,15 @@ let connection: Knex | null = null;
 
 const getConfiguredConnection = () => {
   return knex(knexStringCase({
-    client: 'pg',
+    client: process?.env?.DB_CONNECTION_POSTGREE ? 'pg' : 'mysql2',
     connection: {
-      host: process.env.DB_HOST || '0.0.0.0',
-      port: process.env.DB_PORT || 3306,
-      user: process.env.DB_USER || 'aplicacao',
-      password: process.env.DB_PASSWORD || 'Senha123@',
-      database: process.env.DB_DATABASE || 'franquia',
-      timezone: process.env.DB_TIMEZONE || 'UTC'
+      connectionString: process?.env?.DB_CONNECTION_POSTGREE,
+      host: process.env.DB_HOST_MYSQL || '0.0.0.0',
+      port: process.env.DB_PORT_MYSQL || 3306,
+      user: process.env.DB_USER_MYSQL || 'aplicacao',
+      password: process.env.DB_PASSWORD_MYSQL || 'Senha123@',
+      database: process.env.DB_DATABASE_MYSQL || 'franquia',
+      timezone: process.env.DB_TIMEZONE_MYSQL || 'UTC'
     },
   }))
 }

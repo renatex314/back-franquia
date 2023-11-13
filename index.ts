@@ -4,7 +4,6 @@ import express, { json } from "express";
 import router from "./controllers/routes";
 import authMiddleware from "./middlewares/auth.middleware";
 import authController from "./controllers/auth.controller";
-import { generateToken } from "./utils";
 
 dotenv.config();
 
@@ -24,5 +23,3 @@ app.use("/api/", authMiddleware.authenticateUser, router);
 app.listen(port, () => {
   console.info(`Servidor rodando em: http://localhost:${port}`);
 });
-
-console.log(generateToken('aluno', 'renatocorte34@gmail.com'));
