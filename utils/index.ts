@@ -7,14 +7,14 @@ export const formatDate = (date: Date) =>
     .replace("T", " ")
     .replace(/\.[0-9]+Z/g, "");
 
-export const generateToken = (role: 'aluno' | 'professor', email: string) => {
+export const generateToken = (role: "aluno" | "professor", email: string) => {
   const TOKEN_SECRET = process.env.TOKEN_SECRET;
 
   if (!TOKEN_SECRET) throw new Error("Não foi possível obter o TOKEN");
 
   const tokenData: TokenData = {
     role,
-    userEmail: email
+    userEmail: email,
   };
 
   return jsonwebtoken.sign(tokenData, TOKEN_SECRET, {
@@ -36,4 +36,14 @@ export const decodeVerifyToken = (token: string) => {
 
     throw new Error("Token inválido");
   }
+};
+
+export const getTokenDataByAuthString = (authString: string) => {
+  const tokenString = authString?.split(" ")?.[1];
+
+  if (!tokenString || tokenString === "") {
+    throw new Error("Não foi possível obter o token a partir do authString");
+  }
+
+  return decodeVerifyToken(tokenString);
 };

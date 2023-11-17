@@ -26,6 +26,7 @@ router.get(
   "/aluno/notas/desempenho",
   alunoController.getAlunoRegisteredCoursesStatus
 );
+router.get("/aluno/cursos/list", alunoController.getAlunoCoursesDataList);
 
 /*****************************/
 /***       DADOS ME        ***/

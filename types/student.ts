@@ -1,6 +1,8 @@
 import { Curso } from "./curso";
 import { FranquiaCurso } from "./franquiacurso";
 import { Idioma } from "./idioma";
+import { Matricula } from "./matricula";
+import { Professor } from "./professor";
 
 export interface Student {
   alunoId: number;
@@ -11,14 +13,20 @@ export interface Student {
   alunoEmail: string;
   alunoSenhaHash: string;
   alunoDataNascimento: string;
-  alunoFranquiaId: number
+  alunoFranquiaId: number;
 }
 
-export type CreateStudentData = Omit<Student, 'alunoId'>;
+export type CreateStudentData = Omit<Student, "alunoId">;
 
 export type GetAlunoRegisteredCoursesStatusResponse = Array<{
   curso: Curso;
   idioma: Idioma;
   franquiaCurso: FranquiaCurso;
   media: number;
+}>;
+
+export type GetAlunoCoursesDataListResponse = Array<{
+  matricula: Matricula;
+  curso: Curso;
+  professores: Array<Professor>;
 }>;
