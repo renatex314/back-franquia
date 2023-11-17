@@ -22,6 +22,7 @@ export type GetAlunoRegisteredCoursesStatusResponse = Array<{
   curso: Curso;
   idioma: Idioma;
   franquiaCurso: FranquiaCurso;
+  matriculaId: number;
   media: number;
 }>;
 

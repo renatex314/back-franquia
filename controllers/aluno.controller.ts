@@ -49,6 +49,7 @@ const getAlunoRegisteredCoursesStatus: RequestHandler = async (req, res) => {
 
     for (let i = 0; i < matriculasAtivas.length; i++) {
       const matriculaAtual = matriculasAtivas[i];
+      const matriculaId = matriculaAtual.matriculaId;
       const franquiaCurso = await franquiacursoService.getFranquiaCursoByFields(
         { franquiaCursoId: matriculaAtual.matriculaCursoFranquiaId }
       );
@@ -79,6 +80,7 @@ const getAlunoRegisteredCoursesStatus: RequestHandler = async (req, res) => {
         idioma,
         franquiaCurso,
         media,
+        matriculaId,
       });
     }
 
@@ -145,6 +147,23 @@ const getAlunoCoursesDataList: RequestHandler = async (req, res) => {
   } catch (err) {
     res.status(500).send((err as Error)?.message);
   }
+};
+
+const getAlunoSelectedCourseData: RequestHandler = async (req, res) => {
+  const tokenData = getTokenDataByAuthString(
+    req.headers["authorization"] || ""
+  );
+  const matriculaId = Number(req.query.matriculaId);
+
+  const alunoData = await studentService.getStudentByFields({
+    alunoEmail: tokenData.userEmail,
+  });
+  const matriculaData = (
+    await matriculaService.getMatriculasByFields({
+      matriculaId,
+      matriculaAlunoId: alunoData.alunoId,
+    })
+  )?.[0];
 };
 
 export default {
