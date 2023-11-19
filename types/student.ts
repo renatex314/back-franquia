@@ -1,7 +1,9 @@
+import { Avaliacao } from "./avaliacao";
 import { Curso } from "./curso";
 import { FranquiaCurso } from "./franquiacurso";
 import { Idioma } from "./idioma";
 import { Matricula } from "./matricula";
+import { Pagamento, PagamentoResponse } from "./pagamento";
 import { Professor } from "./professor";
 
 export interface Student {
@@ -31,3 +33,12 @@ export type GetAlunoCoursesDataListResponse = Array<{
   curso: Curso;
   professores: Array<Professor>;
 }>;
+
+export type getAlunoSelectedCourseDataResponse = {
+  matricula: Matricula;
+  curso: Curso;
+  idioma: Idioma;
+  avaliacoes: Array<Avaliacao>;
+  professores: Array<Professor>;
+  pagamentos: Array<PagamentoResponse>;
+};

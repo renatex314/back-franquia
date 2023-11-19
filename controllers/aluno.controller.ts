@@ -3,6 +3,7 @@ import matriculaService from "../services/matricula.service";
 import {
   GetAlunoCoursesDataListResponse,
   GetAlunoRegisteredCoursesStatusResponse,
+  getAlunoSelectedCourseDataResponse,
 } from "../types/student";
 import cursoService from "../services/curso.service";
 import franquiacursoService from "../services/franquiacurso.service";
@@ -13,6 +14,7 @@ import studentService from "../services/student.service";
 import cursofranquiaprofessorService from "../services/cursofranquiaprofessor.service";
 import { Professor } from "../types/professor";
 import professorService from "../services/professor.service";
+import pagamentoService from "../services/pagamento.service";
 
 const getAlunoRegisteredCoursesStatus: RequestHandler = async (req, res) => {
   const tokenData = getTokenDataByAuthString(
@@ -153,20 +155,80 @@ const getAlunoSelectedCourseData: RequestHandler = async (req, res) => {
   const tokenData = getTokenDataByAuthString(
     req.headers["authorization"] || ""
   );
-  const matriculaId = Number(req.query.matriculaId);
+  const matriculaId = Number(req.params.matriculaId);
 
-  const alunoData = await studentService.getStudentByFields({
-    alunoEmail: tokenData.userEmail,
-  });
-  const matriculaData = (
-    await matriculaService.getMatriculasByFields({
-      matriculaId,
-      matriculaAlunoId: alunoData.alunoId,
-    })
-  )?.[0];
+  if (!matriculaId) {
+    return res.status(400).send("O ID da matrícula é obrigatório");
+  }
+
+  try {
+    const alunoData = await studentService.getStudentByFields({
+      alunoEmail: tokenData.userEmail,
+    });
+    const matriculaData = (
+      await matriculaService.getMatriculasByFields({
+        matriculaId,
+        matriculaAlunoId: alunoData.alunoId,
+      })
+    )?.[0];
+
+    if (
+      !matriculaData ||
+      matriculaData?.matriculaAlunoId !== alunoData.alunoId
+    ) {
+      return res.status(404).send("Este aluno não possuí esta matrícula");
+    }
+
+    const cursoFranquiaData =
+      await franquiacursoService.getFranquiaCursoByFields({
+        franquiaCursoId: matriculaData.matriculaCursoFranquiaId,
+      });
+    const cursoData = await cursoService.getCursoByFields({
+      cursoId: cursoFranquiaData.franquiaCursoCursoId,
+    });
+    const idiomaData = await idiomaService.getIdiomaByFields({
+      idiomaId: cursoData.cursoIdiomaId,
+    });
+    const avaliacoesData = await avaliacaoService.getAvaliacoesByFields({
+      avaliacaoMatriculaId: matriculaData.matriculaId,
+    });
+    const pagamentosData = await pagamentoService.getPagamentosByFields({
+      pagamentoMatriculaId: matriculaData.matriculaId,
+    });
+    const professoresCursosData =
+      await cursofranquiaprofessorService.getCursofranquiaProfessorListByFields(
+        {
+          professorCursofranquiaFranquiaCursoId:
+            cursoFranquiaData.franquiaCursoId,
+        }
+      );
+    const professoresData: Array<Professor> = [];
+
+    for (let i = 0; i < professoresCursosData.length; i++) {
+      const professorId =
+        professoresCursosData[i].professorCursofranquiaProfessorId;
+      professoresData.push(
+        await professorService.getProfessorByFields({ professorId })
+      );
+    }
+
+    const response: getAlunoSelectedCourseDataResponse = {
+      matricula: matriculaData,
+      curso: cursoData,
+      idioma: idiomaData,
+      avaliacoes: avaliacoesData,
+      pagamentos: pagamentosData,
+      professores: professoresData,
+    };
+
+    res.status(200).json(response);
+  } catch (err) {
+    res.status(500).send((err as Error)?.message?.toString());
+  }
 };
 
 export default {
   getAlunoRegisteredCoursesStatus,
   getAlunoCoursesDataList,
+  getAlunoSelectedCourseData,
 };

@@ -104,8 +104,8 @@ CREATE TABLE IF NOT EXISTS pagamento(
     pagamento_id INT PRIMARY KEY AUTO_INCREMENT,
     pagamento_valor DECIMAL(8, 2) NOT NULL,
     pagamento_data DATETIME NOT NULL,
-    pagamento_metodo ENUM("crédito", "débito", "boleto") NOT NULL,
-    pagamento_status ENUM("pendente", "pago", "atrasado") NOT NULL,
+    pagamento_metodo ENUM("crédito", "débito", "boleto"),
+    pagamento_status ENUM("pendente", "pago") NOT NULL,
     pagamento_matricula_id INT NOT NULL,
     CONSTRAINT pgt_mtr_fk FOREIGN KEY (pagamento_matricula_id) REFERENCES matricula(matricula_id)
 );
