@@ -32,6 +32,7 @@ router.get(
   alunoController.getAlunoSelectedCourseData
 );
 router.get("/aluno/pagamentos/list", alunoController.getAlunoPaymentsList);
+router.put("/aluno/update", alunoController.updateAlunoData);
 
 /*****************************/
 /***       DADOS ME        ***/

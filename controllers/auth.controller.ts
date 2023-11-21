@@ -12,7 +12,9 @@ const loginStudent: RequestHandler = async (req, res) => {
   const studentLoginData: StudentLoginData = req.body;
 
   if (studentLoginData.alunoEmail && studentLoginData.alunoSenha) {
-    const studentDataFromDB = await studentService.getStudentByFields({ alunoEmail: studentLoginData.alunoEmail })
+    const studentDataFromDB = await studentService.getStudentByFields({
+      alunoEmail: studentLoginData.alunoEmail,
+    });
 
     if (
       studentDataFromDB &&
@@ -21,7 +23,7 @@ const loginStudent: RequestHandler = async (req, res) => {
         studentDataFromDB.alunoSenhaHash
       )
     ) {
-      const userToken = generateToken('aluno', studentLoginData.alunoEmail);
+      const userToken = generateToken("aluno", studentLoginData.alunoEmail);
 
       return res.status(200).send(userToken);
     }
@@ -35,14 +37,18 @@ const loginStudent: RequestHandler = async (req, res) => {
 const registerStudent: RequestHandler = async (req, res) => {
   const studentData: StudentRegisterData = req.body;
 
-  if (!studentData?.alunoEmail || !studentData?.alunoSenha || !studentData?.alunoCpf) {
+  if (
+    !studentData?.alunoEmail ||
+    !studentData?.alunoSenha ||
+    !studentData?.alunoCpf
+  ) {
     return res.status(400).send("É necessário fornecer E-mail, senha e CPF");
   }
 
   try {
     await authService.registerStudent(studentData);
 
-    res.status(200).send(generateToken('aluno', studentData.alunoEmail));
+    res.status(200).send(generateToken("aluno", studentData.alunoEmail));
   } catch (err) {
     res.status(500).send((err as Error).message);
   }
@@ -54,32 +60,35 @@ const getUserMeData: RequestHandler = async (req, res) => {
   try {
     const tokenData = decodeVerifyToken(token);
 
-    if (!tokenData.role) return res.status(400).send('role não encontrado');
+    if (!tokenData.role) return res.status(400).send("role não encontrado");
 
     let userData: Partial<Professor | Student> = {};
 
-    if (tokenData.role === 'aluno') {
+    if (tokenData.role === "aluno") {
       userData = await studentService.getStudentByFields({
-        alunoEmail: tokenData.userEmail
+        alunoEmail: tokenData.userEmail,
       });
-      delete userData.alunoSenhaHash;
+
+      if (userData?.alunoSenhaHash) {
+        delete userData.alunoSenhaHash;
+      }
     }
 
-    if (tokenData.role === 'professor') {
+    if (tokenData.role === "professor") {
       userData = await professorService.getProfessorByFields({
-        professorEmail: tokenData.userEmail
+        professorEmail: tokenData.userEmail,
       });
       delete userData.professorSenhaHash;
     }
 
     if (!userData) {
-      return res.status(400).send('usuário não encontrado no sistema');
+      return res.status(401).send("usuário não encontrado no sistema");
     } else {
-      if (tokenData.role === 'aluno') {
+      if (tokenData.role === "aluno") {
         delete (userData as Partial<Student>).alunoSenhaHash;
       }
 
-      if (tokenData.role === 'professor') {
+      if (tokenData.role === "professor") {
         delete (userData as Partial<Professor>).professorSenhaHash;
       }
     }

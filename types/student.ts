@@ -21,6 +21,10 @@ export interface Student {
 
 export type CreateStudentData = Omit<Student, "alunoId">;
 
+export type UpdateStudentRequestData = Partial<
+  Omit<Student, "alunoId" | "alunoSenhaHash"> & { alunoSenha: string }
+>;
+
 export type GetAlunoRegisteredCoursesStatusResponse = Array<{
   curso: Curso;
   idioma: Idioma;

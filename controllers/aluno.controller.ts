@@ -15,10 +15,12 @@ import {
   GetAlunoCoursesDataListResponse,
   GetAlunoPaymentsListResponse,
   GetAlunoRegisteredCoursesStatusResponse,
+  UpdateStudentRequestData,
   getAlunoSelectedCourseDataResponse,
 } from "../types/student";
 import { getTokenDataByAuthString } from "../utils";
 import { PagamentoResponse } from "../types/pagamento";
+import bcrypt from "bcrypt";
 
 const getAlunoRegisteredCoursesStatus: RequestHandler = async (req, res) => {
   const tokenData = getTokenDataByAuthString(
@@ -315,9 +317,44 @@ const getAlunoPaymentsList: RequestHandler = async (req, res) => {
   return res.status(200).json(response);
 };
 
+const updateAlunoData: RequestHandler = async (req, res) => {
+  const tokenData = getTokenDataByAuthString(
+    req.headers["authorization"] || ""
+  );
+  const updateData: Partial<UpdateStudentRequestData> & {
+    alunoSenhaHash?: string;
+  } = req.body;
+
+  const alunoData = await studentService.getStudentByFields({
+    alunoEmail: tokenData.userEmail,
+  });
+
+  if (!alunoData) return res.status(400).send("Este aluno não existe");
+
+  try {
+    if (updateData.alunoSenha) {
+      const senhaHash = bcrypt.hashSync(updateData.alunoSenha, 10);
+      delete updateData.alunoSenha;
+
+      updateData.alunoSenhaHash = senhaHash;
+    }
+
+    delete updateData.alunoCpf;
+
+    await studentService.updateStudent(alunoData.alunoId, {
+      ...updateData,
+    });
+
+    res.status(200).send("Dados atualizados com sucesso");
+  } catch (err) {
+    res.status(500).send((err as Error)?.message?.toString());
+  }
+};
+
 export default {
   getAlunoRegisteredCoursesStatus,
   getAlunoCoursesDataList,
   getAlunoSelectedCourseData,
   getAlunoPaymentsList,
+  updateAlunoData,
 };
