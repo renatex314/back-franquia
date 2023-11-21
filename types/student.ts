@@ -1,3 +1,4 @@
+import { Aula, AulaResponseItem } from "./aula";
 import { Avaliacao } from "./avaliacao";
 import { Curso } from "./curso";
 import { FranquiaCurso } from "./franquiacurso";
@@ -38,6 +39,7 @@ export type getAlunoSelectedCourseDataResponse = {
   matricula: Matricula;
   curso: Curso;
   idioma: Idioma;
+  aulas: Array<AulaResponseItem>;
   avaliacoes: Array<Avaliacao>;
   professores: Array<Professor>;
   pagamentos: Array<PagamentoResponse>;

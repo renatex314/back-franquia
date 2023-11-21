@@ -15,6 +15,8 @@ import cursofranquiaprofessorService from "../services/cursofranquiaprofessor.se
 import { Professor } from "../types/professor";
 import professorService from "../services/professor.service";
 import pagamentoService from "../services/pagamento.service";
+import aulaService from "../services/aula.service";
+import { Aula, AulaResponseItem } from "../types/aula";
 
 const getAlunoRegisteredCoursesStatus: RequestHandler = async (req, res) => {
   const tokenData = getTokenDataByAuthString(
@@ -212,9 +214,29 @@ const getAlunoSelectedCourseData: RequestHandler = async (req, res) => {
       );
     }
 
+    const aulasData = await aulaService.getAulasByFields({
+      aulaFranquiaCursoId: cursoFranquiaData.franquiaCursoId,
+    });
+
+    const aulasDataResponse: Array<AulaResponseItem> = [];
+
+    for (let i = 0; i < aulasData.length; i++) {
+      const aulaData = aulasData[i];
+      const professorId = aulasData[i].aulaProfessorId;
+      aulasDataResponse.push({
+        aulaId: aulaData.aulaId,
+        aulaData: aulaData.aulaData,
+        aulaLocal: aulaData.aulaLocal,
+        aulaStatus: aulaData.aulaStatus,
+        professor: await professorService.getProfessorByFields({ professorId }),
+        aulaFranquiaCursoId: aulaData.aulaFranquiaCursoId,
+      });
+    }
+
     const response: getAlunoSelectedCourseDataResponse = {
       matricula: matriculaData,
       curso: cursoData,
+      aulas: aulasDataResponse,
       idioma: idiomaData,
       avaliacoes: avaliacoesData,
       pagamentos: pagamentosData,
