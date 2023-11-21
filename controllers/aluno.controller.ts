@@ -1,22 +1,24 @@
 import { RequestHandler } from "express";
+import aulaService from "../services/aula.service";
+import avaliacaoService from "../services/avaliacao.service";
+import cursoService from "../services/curso.service";
+import cursofranquiaprofessorService from "../services/cursofranquiaprofessor.service";
+import franquiacursoService from "../services/franquiacurso.service";
+import idiomaService from "../services/idioma.service";
 import matriculaService from "../services/matricula.service";
+import pagamentoService from "../services/pagamento.service";
+import professorService from "../services/professor.service";
+import studentService from "../services/student.service";
+import { AulaResponseItem } from "../types/aula";
+import { Professor } from "../types/professor";
 import {
   GetAlunoCoursesDataListResponse,
+  GetAlunoPaymentsListResponse,
   GetAlunoRegisteredCoursesStatusResponse,
   getAlunoSelectedCourseDataResponse,
 } from "../types/student";
-import cursoService from "../services/curso.service";
-import franquiacursoService from "../services/franquiacurso.service";
-import idiomaService from "../services/idioma.service";
-import avaliacaoService from "../services/avaliacao.service";
 import { getTokenDataByAuthString } from "../utils";
-import studentService from "../services/student.service";
-import cursofranquiaprofessorService from "../services/cursofranquiaprofessor.service";
-import { Professor } from "../types/professor";
-import professorService from "../services/professor.service";
-import pagamentoService from "../services/pagamento.service";
-import aulaService from "../services/aula.service";
-import { Aula, AulaResponseItem } from "../types/aula";
+import { PagamentoResponse } from "../types/pagamento";
 
 const getAlunoRegisteredCoursesStatus: RequestHandler = async (req, res) => {
   const tokenData = getTokenDataByAuthString(
@@ -209,9 +211,14 @@ const getAlunoSelectedCourseData: RequestHandler = async (req, res) => {
     for (let i = 0; i < professoresCursosData.length; i++) {
       const professorId =
         professoresCursosData[i].professorCursofranquiaProfessorId;
-      professoresData.push(
-        await professorService.getProfessorByFields({ professorId })
-      );
+      const professorData: Partial<Professor> =
+        await professorService.getProfessorByFields({ professorId });
+
+      delete professorData.professorSenhaHash;
+      delete professorData.professorTelefone;
+      delete professorData.professorCpf;
+
+      professoresData.push(professorData as Professor);
     }
 
     const aulasData = await aulaService.getAulasByFields({
@@ -223,12 +230,19 @@ const getAlunoSelectedCourseData: RequestHandler = async (req, res) => {
     for (let i = 0; i < aulasData.length; i++) {
       const aulaData = aulasData[i];
       const professorId = aulasData[i].aulaProfessorId;
+      const professorData: Partial<Professor> =
+        await professorService.getProfessorByFields({ professorId });
+
+      delete professorData.professorSenhaHash;
+      delete professorData.professorTelefone;
+      delete professorData.professorCpf;
+
       aulasDataResponse.push({
         aulaId: aulaData.aulaId,
         aulaData: aulaData.aulaData,
         aulaLocal: aulaData.aulaLocal,
         aulaStatus: aulaData.aulaStatus,
-        professor: await professorService.getProfessorByFields({ professorId }),
+        professor: professorData as Professor,
         aulaFranquiaCursoId: aulaData.aulaFranquiaCursoId,
       });
     }
@@ -249,8 +263,61 @@ const getAlunoSelectedCourseData: RequestHandler = async (req, res) => {
   }
 };
 
+const getAlunoPaymentsList: RequestHandler = async (req, res) => {
+  const tokenData = getTokenDataByAuthString(
+    req.headers["authorization"] || ""
+  );
+
+  const alunoId = (
+    await studentService.getStudentByFields({
+      alunoEmail: tokenData.userEmail,
+    })
+  ).alunoId;
+
+  const response: GetAlunoPaymentsListResponse = [];
+
+  const matriculas = await matriculaService.getMatriculasByFields({
+    matriculaAlunoId: alunoId,
+  });
+
+  for (let i = 0; i < matriculas.length; i++) {
+    const matriculaData = matriculas[i];
+    const cursoFranquiaDataCursoId = (
+      await franquiacursoService.getFranquiaCursoByFields({
+        franquiaCursoId: matriculaData.matriculaCursoFranquiaId,
+      })
+    ).franquiaCursoCursoId;
+    const cursoData = await cursoService.getCursoByFields({
+      cursoId: cursoFranquiaDataCursoId,
+    });
+    const pagamentosData = await pagamentoService.getPagamentosByFields({
+      pagamentoMatriculaId: matriculaData.matriculaId,
+    });
+
+    pagamentosData.forEach((pagamentoData) => {
+      response.push({
+        ...pagamentoData,
+        curso: cursoData,
+        matricula: matriculaData,
+      });
+    });
+  }
+
+  const pagamentoToSortNumber = (pagamento: PagamentoResponse) =>
+    pagamento.pagamentoStatus === "pago"
+      ? 0
+      : pagamento.pagamentoStatus === "pendente"
+      ? 1
+      : 2;
+
+  response.sort((a, b) => pagamentoToSortNumber(b) - pagamentoToSortNumber(a));
+
+  return res.status(200).json(response);
+};
+
 export default {
   getAlunoRegisteredCoursesStatus,
   getAlunoCoursesDataList,
   getAlunoSelectedCourseData,
+  getAlunoPaymentsList,
 };

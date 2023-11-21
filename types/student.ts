@@ -44,3 +44,10 @@ export type getAlunoSelectedCourseDataResponse = {
   professores: Array<Professor>;
   pagamentos: Array<PagamentoResponse>;
 };
+
+export type GetAlunoPaymentsListResponse = Array<
+  PagamentoResponse & {
+    matricula: Matricula;
+    curso: Curso;
+  }
+>;

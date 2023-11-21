@@ -100,12 +100,12 @@ CREATE TABLE IF NOT EXISTS matricula(
 );
 
 CREATE TYPE pagamento_metodo_tipos AS ENUM('crédito', 'débito', 'boleto');
-CREATE TYPE pagamento_status_tipos AS ENUM('pendente', 'pago', 'atrasado');
+CREATE TYPE pagamento_status_tipos AS ENUM('pendente', 'pago');
 CREATE TABLE IF NOT EXISTS pagamento(
     pagamento_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     pagamento_valor DECIMAL(8, 2) NOT NULL,
     pagamento_data TIMESTAMP NOT NULL,
-    pagamento_metodo pagamento_metodo_tipos NOT NULL,
+    pagamento_metodo pagamento_metodo_tipos,
     pagamento_status pagamento_status_tipos NOT NULL,
     pagamento_matricula_id INT NOT NULL,
     CONSTRAINT pgt_mtr_fk FOREIGN KEY (pagamento_matricula_id) REFERENCES matricula(matricula_id)

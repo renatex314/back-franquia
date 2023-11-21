@@ -31,6 +31,7 @@ router.get(
   "/aluno/cursos/:matriculaId",
   alunoController.getAlunoSelectedCourseData
 );
+router.get("/aluno/pagamentos/list", alunoController.getAlunoPaymentsList);
 
 /*****************************/
 /***       DADOS ME        ***/
