@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS pagamento(
     pagamento_metodo pagamento_metodo_tipos,
     pagamento_status pagamento_status_tipos NOT NULL,
     pagamento_matricula_id INT NOT NULL,
+    CONSTRAINT pgt_sts_ck CHECK(pagamento_status="pendente" OR (pagamento_status="pago" AND pagamento_metodo IS NOT NULL)),
     CONSTRAINT pgt_mtr_fk FOREIGN KEY (pagamento_matricula_id) REFERENCES matricula(matricula_id)
 );
 

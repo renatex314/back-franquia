@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS pagamento(
     pagamento_metodo ENUM("crédito", "débito", "boleto"),
     pagamento_status ENUM("pendente", "pago") NOT NULL,
     pagamento_matricula_id INT NOT NULL,
+    CONSTRAINT pgt_sts_ck CHECK(pagamento_status="pendente" OR (pagamento_status="pago" AND pagamento_metodo NOT NULL)),
     CONSTRAINT pgt_mtr_fk FOREIGN KEY (pagamento_matricula_id) REFERENCES matricula(matricula_id)
 );
 
