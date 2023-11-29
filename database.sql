@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS pagamento(
     pagamento_metodo ENUM("crédito", "débito", "boleto"),
     pagamento_status ENUM("pendente", "pago") NOT NULL,
     pagamento_matricula_id INT NOT NULL,
-    CONSTRAINT pgt_sts_ck CHECK(pagamento_status="pendente" OR (pagamento_status="pago" AND pagamento_metodo NOT NULL)),
+    CONSTRAINT pgt_sts_ck CHECK(pagamento_status="pendente" OR (pagamento_status="pago" AND pagamento_metodo IS NOT NULL)),
     CONSTRAINT pgt_mtr_fk FOREIGN KEY (pagamento_matricula_id) REFERENCES matricula(matricula_id)
 );
 
@@ -124,4 +124,225 @@ CREATE USER IF NOT EXISTS 'aplicacao'@'localhost' IDENTIFIED BY 'Senha123@';
 GRANT ALL ON franquia.* TO 'aplicacao'@'localhost';
 
 
+-- dados de exemplo
 
+INSERT INTO 
+    franqueado(
+        franqueado_nome,
+        franqueado_endereco,
+        franqueado_telefone,
+        franqueado_cpf
+    )
+    VALUES
+    (
+        "Carlos",
+        "Rua das Frutas",
+        "11493850493824",
+        "10493827485"
+    );
+
+INSERT INTO
+    franquia(
+        franquia_nome,
+        franquia_endereco,
+        franquia_telefone,
+        franquia_franqueado_id
+    )
+    VALUES
+    (
+        "Franquia Vila Césamo",
+        "Rua das Oliveiras Nº 45",
+        "11495834809",
+        1
+    );
+
+INSERT INTO 
+    aluno(
+        aluno_nome, 
+        aluno_endereco, 
+        aluno_telefone, 
+        aluno_data_nascimento, 
+        aluno_cpf,
+        aluno_email,
+        aluno_senha_hash,
+        aluno_franquia_id
+    ) 
+    VALUES 
+    (
+        "Aluno de Teste",
+        "Rua Joaquim de Freitas Nº 64",
+        "1194832049584",
+        "2003-01-05",
+        "11111111111",
+        "teste@teste.com",
+        "$2b$10$PQLhxljGJ9SXBrAuM5ft1.Xn.vsGOYIPpGu9KWBqpFTtTF/O92SIq",
+        1
+    );
+
+INSERT INTO 
+    professor(
+        professor_nome, 
+        professor_telefone,
+        professor_email,
+        professor_senha_hash,
+        professor_cpf
+    )
+    VALUES
+    (
+        "Fernando Guedes",
+        "1139485720394",
+        "profteste@teste.com",
+        "$2b$10$6bBYFIl3Wp.hCVdLEAMR5.WZKT3ELDryfjNBTNUJSMGGmW5X/BhHy",
+        "39483720495"
+    );
+    
+INSERT INTO
+    idioma(
+        idioma_nome
+    )
+    VALUES
+    (
+        "inglês"
+    );
+
+INSERT INTO 
+    curso(
+        curso_nome,
+        curso_nivel,
+        curso_idioma_id
+    )
+    VALUES
+    (
+        "Curso de Inglês",
+        "iniciante",
+        1
+    );
+
+INSERT INTO 
+    franquia_curso(
+        franquia_curso_franquia_id,
+        franquia_curso_curso_id
+    )
+    VALUES
+    (
+        1,
+        1
+    );
+
+INSERT INTO 
+    aula(
+        aula_data,
+        aula_local,
+        aula_status,
+        aula_franquia_curso_id,
+        aula_professor_id
+    )
+    VALUES
+    (
+        "2023-11-29",
+        "Auditório Maurício de Souza",
+        "programada",
+        1,
+        1
+    );
+
+INSERT INTO
+    matricula(
+        matricula_status,
+        matricula_data,
+        matricula_aluno_id,
+        matricula_curso_franquia_id
+    )
+    VALUES
+    (
+        "ativa",
+        "2023-09-01",
+        1,
+        1
+    );
+
+INSERT INTO 
+    avaliacao(
+        avaliacao_nota,
+        avaliacao_descricao,
+        avaliacao_data,
+        avaliacao_matricula_id
+    )
+    VALUES
+    (
+        4.5,
+        "Prova Bimestral",
+        "2023-11-03T18:00:00.000",
+        1
+    ),
+    (
+        2.0,
+        "Prova de Recuperação",
+        "2023-11-06T18:00:00.000",
+        1
+    ),
+    (
+        1.0,
+        "Prova de Teste",
+        "2023-11-04T18:00:00.000",
+        1
+    ),
+    (
+        3.3,
+        "Avaliação Final",
+        "2023-11-05T18:00:00.000",
+        1
+    );
+
+INSERT INTO
+    pagamento(
+        pagamento_valor,
+        pagamento_data,
+        pagamento_metodo,
+        pagamento_status,
+        pagamento_matricula_id
+    )
+    VALUES
+    (
+        301.50,
+        "2023-11-21T17:00:00",
+        NULL,
+        "pendente",
+        1
+    ),
+    (
+        450.30,
+        "2023-11-15T13:00:00",
+        "boleto",
+        "pago",
+        1
+    ),
+    (
+        480.30,
+        "2023-11-30T14:00:00",
+        NULL,
+        "pendente",
+        1
+    );
+
+INSERT INTO 
+    professor_cursofranquia(
+        professor_cursofranquia_professor_id,
+        professor_cursofranquia_franquia_curso_id
+    )
+    VALUES
+    (
+        1,
+        1
+    );
+
+INSERT INTO 
+    professor_idioma(
+        professor_idioma_professor_id,
+        professor_idioma_idioma_id
+    )
+    VALUES
+    (
+        1,
+        1
+    );
